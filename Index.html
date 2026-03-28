@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>PROPEL CRM | Complete Real Estate Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #d4af37;
+            --gold-dark: #b38f40;
+            --emerald: #10b981;
+            --ruby: #ef4444;
+            --sapphire: #3b82f6;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #0a0c10;
+            --bg-secondary: #111418;
+            --bg-tertiary: #1a1f25;
+            --bg-card: #151b22;
+            --border: rgba(255,255,255,0.08);
+            --text-primary: #f0f3f8;
+            --text-secondary: #9aa4b8;
+            --text-muted: #5f6b7e;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; height: 100vh; }
+        .app { display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            transform: translateX(0);
+            box-shadow: var(--shadow);
+        }
+        .sidebar.hidden { transform: translateX(-100%); }
+        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 12px; font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; }
+        .logo i { color: var(--gold); font-size: 26px; }
+        .logo span { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .sidebar-close { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-tertiary); border: 1px solid var(--border); cursor: pointer; color: var(--text-secondary); }
+        .sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .nav-item.active { background: rgba(212, 175, 55, 0.12); color: var(--gold); border-left: 3px solid var(--gold); }
+        .nav-item i { width: 22px; }
+        .nav-badge { margin-left: auto; background: var(--bg-tertiary); padding: 2px 8px; border-radius: 20px; font-size: 11px; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); }
+        .user-info { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; }
+        .user-info:hover { background: rgba(255,255,255,0.05); }
+        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #0a0c10; }
+        
+        /* Main */
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; margin-left: 280px; transition: margin-left 0.3s; }
+        .main.sidebar-hidden { margin-left: 0; }
+        .topbar { height: 70px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; gap: 16px; }
+        .menu-toggle { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-tertiary); border: 1px solid var(--border); cursor: pointer; color: var(--text-secondary); }
+        .search-wrapper { flex: 1; max-width: 400px; position: relative; }
+        .search-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .search-wrapper input { width: 100%; padding: 10px 14px 10px 40px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 40px; color: var(--text-primary); outline: none; }
+        .topbar-actions { display: flex; gap: 8px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-tertiary); border: 1px solid var(--border); cursor: pointer; color: var(--text-secondary); }
+        .btn-primary { padding: 10px 20px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border: none; border-radius: var(--radius-sm); color: #0a0c10; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-secondary { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; }
+        .content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+        
+        /* Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; cursor: pointer; transition: all 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); border-color: var(--gold); }
+        .stat-title { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-weight: 700; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 24px; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: var(--gold); }
+        .card-body { padding: 20px; }
+        .list-item { padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
+        .list-item:hover { background: var(--bg-tertiary); transform: translateX(4px); }
+        
+        /* Contact Card */
+        .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .contact-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; }
+        .contact-card:hover { transform: translateY(-4px); border-color: var(--gold); }
+        .contact-avatar { width: 56px; height: 56px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600; margin-bottom: 12px; color: #0a0c10; }
+        .contact-name { font-size: 18px; font-weight: 600; }
+        .contact-meta { font-size: 13px; color: var(--text-muted); margin: 4px 0; }
+        .contact-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+        .hot-badge { position: absolute; top: 12px; right: 12px; background: var(--ruby); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; color: white; }
+        
+        /* Contact Panel */
+        .contact-panel { position: fixed; top: 0; right: 0; width: 600px; height: 100vh; background: var(--bg-card); border-left: 1px solid var(--border); z-index: 1500; transform: translateX(100%); transition: transform 0.3s; display: flex; flex-direction: column; }
+        .contact-panel.active { transform: translateX(0); }
+        .panel-header { padding: 20px 24px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .panel-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg-secondary); padding: 0 16px; gap: 4px; overflow-x: auto; }
+        .panel-tab { padding: 14px 20px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; }
+        .panel-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .panel-body { flex: 1; overflow-y: auto; padding: 24px; }
+        
+        /* Inbox */
+        .inbox-layout { display: flex; gap: 20px; height: calc(100vh - 180px); }
+        .inbox-sidebar { width: 260px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+        .inbox-channel { padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); }
+        .inbox-channel:hover { background: var(--bg-tertiary); }
+        .inbox-channel.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); }
+        .inbox-list { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-y: auto; }
+        .message-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 12px; }
+        .message-item:hover { background: var(--bg-tertiary); }
+        .message-item.unread { background: rgba(212, 175, 55, 0.05); border-left: 3px solid var(--gold); }
+        .message-detail { width: 380px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-y: auto; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); outline: none; }
+        .form-input:focus, .form-select:focus { border-color: var(--gold); }
+        .form-textarea { resize: vertical; min-height: 80px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        
+        /* Modal */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-card); border-radius: var(--radius-lg); max-width: 550px; width: 90%; max-height: 85vh; overflow-y: auto; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--bg-card); border: 1px solid var(--gold); padding: 12px 24px; border-radius: 40px; z-index: 3000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; }
+        
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .contact-panel { width: 100%; }
+            .inbox-layout { flex-direction: column; height: auto; }
+            .message-detail { width: 100%; }
+        }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } .content { padding: 16px; } }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"><i class="fas fa-chart-line"></i><span>PROPEL</span></div>
+            <button class="sidebar-close" id="sidebarCloseBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-item active" data-view="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></div>
+            <div class="nav-item" data-view="contacts"><i class="fas fa-users"></i><span>Contacts</span><span class="nav-badge" id="contactCount">0</span></div>
+            <div class="nav-item" data-view="inbox"><i class="fas fa-inbox"></i><span>Inbox</span><span class="nav-badge" id="inboxCount">0</span></div>
+            <div class="nav-item" data-view="pipeline"><i class="fas fa-chart-simple"></i><span>Pipeline</span></div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-info" id="accountBtn">
+                <div class="user-avatar">HM</div>
+                <div><div>Haris Memic</div><div style="font-size: 11px; color: var(--text-muted);">Agent · Cyprus</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="main" id="main">
+        <div class="topbar">
+            <button class="menu-toggle" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+            <div class="search-wrapper"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="Search contacts..."></div>
+            <div class="topbar-actions">
+                <button class="icon-btn" id="themeToggleBtn"><i class="fas fa-moon"></i></button>
+                <button class="btn-primary" id="addContactBtn"><i class="fas fa-plus"></i> Add Contact</button>
+            </div>
+        </div>
+        <div class="content" id="content"></div>
+    </div>
+</div>
+
+<div class="contact-panel" id="contactPanel">
+    <div class="panel-header"><h3 id="panelContactName">Contact</h3><button class="icon-btn" onclick="closeContactPanel()"><i class="fas fa-times"></i></button></div>
+    <div class="panel-tabs" id="panelTabs"></div>
+    <div class="panel-body" id="panelBody"></div>
+</div>
+
+<div class="modal" id="genericModal"><div class="modal-content"><div class="modal-header"><h3 id="modalTitle">Modal</h3><button class="icon-btn" onclick="closeModal('genericModal')"><i class="fas fa-times"></i></button></div><div class="modal-body" id="modalBody"></div><div class="modal-footer"><button class="btn-secondary" onclick="closeModal('genericModal')">Cancel</button><button class="btn-primary" id="modalSaveBtn">Save</button></div></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================
+// PROPEL CRM - COMPLETE WORKING VERSION
+// ============================================
+
+let appState = {
+    contacts: [],
+    deals: [],
+    messages: [],
+    tasks: [],
+    events: [],
+    currentContactId: null,
+    currentView: 'dashboard',
+    currentChannel: 'all',
+    nextId: { contact: 4, deal: 4, message: 5, task: 4, event: 3 }
+};
+
+// Helper Functions
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function formatCurrency(amt) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(amt);
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function getInitials(first, last) {
+    return (first?.[0] || '') + (last?.[0] || '');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+// Initialize Sample Data
+function initData() {
+    appState.contacts = [
+        { id: 1, firstName: 'Maria', lastName: 'Andreou', email: 'maria@example.com', phone: '+357 99 111 222', type: 'Buyer', budget: '€350K-€450K', location: 'Limassol', notes: 'Looking for sea view', leadScore: 85, logs: [], notesList: [], files: [], activities: [] },
+        { id: 2, firstName: 'Nikos', lastName: 'Papadopoulos', email: 'nikos@example.com', phone: '+357 99 333 444', type: 'Seller', budget: '€620,000', location: 'Nicosia', notes: 'Motivated seller', leadScore: 90, logs: [], notesList: [], files: [], activities: [] },
+        { id: 3, firstName: 'Elena', lastName: 'Stavrou', email: 'elena@example.com', phone: '+357 99 555 666', type: 'Investor', budget: '€1.2M', location: 'Paphos', notes: 'Cash buyer', leadScore: 95, logs: [], notesList: [], files: [], activities: [] }
+    ];
+    appState.deals = [
+        { id: 1, contactId: 1, propertyAddress: 'Marina Tower, Limassol', price: 385000, stage: 'viewing', notes: 'Second viewing scheduled' },
+        { id: 2, contactId: 3, propertyAddress: 'Coastal Complex, Paphos', price: 1200000, stage: 'offer', notes: 'Negotiating price' }
+    ];
+    appState.messages = [
+        { id: 1, channel: 'email', from: 'maria@example.com', fromName: 'Maria Andreou', subject: 'Viewing Request', body: 'Hi Haris, when can we schedule a second viewing?', time: new Date().toISOString(), read: false, contactId: 1, integration: 'Gmail' },
+        { id: 2, channel: 'whatsapp', from: '+35799333444', fromName: 'Nikos Papadopoulos', body: 'Any update on the valuation?', time: new Date(Date.now() - 86400000).toISOString(), read: true, contactId: 2, integration: 'WhatsApp' },
+        { id: 3, channel: 'email', from: 'elena@example.com', fromName: 'Elena Stavrou', subject: 'Investment Portfolio', body: 'Please send me the financials.', time: new Date(Date.now() - 172800000).toISOString(), read: false, contactId: 3, integration: 'Gmail' }
+    ];
+    appState.tasks = [
+        { id: 1, title: 'Follow up with Maria about viewing', dueDate: '2026-03-22', priority: 'high', completed: false, contactId: 1 },
+        { id: 2, title: 'Send valuation report to Nikos', dueDate: '2026-03-23', priority: 'medium', completed: false, contactId: 2 },
+        { id: 3, title: 'Prepare investment proposal for Elena', dueDate: '2026-03-24', priority: 'high', completed: false, contactId: 3 }
+    ];
+    appState.events = [
+        { id: 1, title: 'Marina Tower Viewing', date: '2026-03-25', time: '10:00', type: 'Viewing', contactId: 1 },
+        { id: 2, title: 'Contract Signing', date: '2026-03-28', time: '14:00', type: 'Signing', contactId: 2 }
+    ];
+    updateCounters();
+}
+
+function updateCounters() {
+    document.getElementById('contactCount').textContent = appState.contacts.length;
+    document.getElementById('inboxCount').textContent = appState.messages.filter(m => !m.read).length;
+}
+
+// Dashboard
+function renderDashboard() {
+    const activeDeals = appState.deals.filter(d => d.stage !== 'closed').length;
+    const pendingTasks = appState.tasks.filter(t => !t.completed).length;
+    const totalValue = appState.deals.reduce((s, d) => s + d.price, 0);
+    
+    document.getElementById('content').innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card" onclick="navigateTo('contacts')"><div class="stat-title">Total Contacts</div><div class="stat-value">${appState.contacts.length}</div><div class="stat-change up">Active network</div></div>
+            <div class="stat-card" onclick="navigateTo('pipeline')"><div class="stat-title">Active Deals</div><div class="stat-value">${activeDeals}</div><div class="stat-change up">${formatCurrency(totalValue)}</div></div>
+            <div class="stat-card" onclick="navigateTo('inbox')"><div class="stat-title">Unread Messages</div><div class="stat-value">${appState.messages.filter(m=>!m.read).length}</div><div class="stat-change">Inbox</div></div>
+            <div class="stat-card" onclick="openAddTaskModal()"><div class="stat-title">Pending Tasks</div><div class="stat-value">${pendingTasks}</div><div class="stat-change">To do</div></div>
+        </div>
+        <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-tasks"></i> Tasks</div><button class="btn-secondary btn-sm" onclick="openAddTaskModal()">+ Add Task</button></div><div class="card-body">${appState.tasks.filter(t=>!t.completed).slice(0,5).map(t => `<div class="list-item" onclick="openContactPanel(${t.contactId})"><div><i class="fas fa-check-circle"></i></div><div><div><strong>${t.title}</strong></div><div class="text-muted">Due ${formatDate(t.dueDate)} · ${t.priority}</div></div></div>`).join('') || '<div class="empty-state">No pending tasks</div>'}</div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-calendar"></i> Events</div><button class="btn-secondary btn-sm" onclick="openAddEventModal()">+ Add Event</button></div><div class="card-body">${appState.events.slice(0,5).map(e => `<div class="list-item" onclick="openContactPanel(${e.contactId})"><div><i class="fas fa-calendar-day"></i></div><div><div><strong>${e.title}</strong></div><div class="text-muted">${formatDate(e.date)} at ${e.time} · ${e.type}</div></div></div>`).join('') || '<div class="empty-state">No upcoming events</div>'}</div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-line"></i> Active Deals</div><button class="btn-secondary btn-sm" onclick="navigateTo('pipeline')">View All</button></div><div class="card-body">${appState.deals.slice(0,5).map(d => { const c = appState.contacts.find(c => c.id === d.contactId); return `<div class="list-item" onclick="openContactPanel(${d.contactId})"><div><i class="fas fa-home"></i></div><div><div><strong>${d.propertyAddress}</strong></div><div class="text-muted">${c?.firstName} ${c?.lastName} · ${formatCurrency(d.price)}</div></div></div>`; }).join('') || '<div class="empty-state">No active deals</div>'}</div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-envelope"></i> Recent Messages</div><button class="btn-secondary btn-sm" onclick="navigateTo('inbox')">View All</button></div><div class="card-body">${appState.messages.slice(0,5).map(m => `<div class="list-item" onclick="openContactPanel(${m.contactId})"><div><i class="fas fa-envelope"></i></div><div><div><strong>${m.fromName}</strong></div><div class="text-muted">${m.body.substring(0,60)}${m.body.length>60?'...':''}</div></div></div>`).join('') || '<div class="empty-state">No messages</div>'}</div></div>
+    `;
+}
+
+// Contacts
+function renderContacts() {
+    document.getElementById('content').innerHTML = `<div style="margin-bottom:24px;"><h2>Contact Directory</h2><p>${appState.contacts.length} contacts</p></div><div class="contacts-grid" id="contactsGrid"></div>`;
+    renderContactsGrid();
+}
+
+function renderContactsGrid(filter = '') {
+    let filtered = appState.contacts.filter(c => `${c.firstName} ${c.lastName} ${c.email}`.toLowerCase().includes(filter.toLowerCase()));
+    document.getElementById('contactsGrid').innerHTML = filtered.map(c => `
+        <div class="contact-card" onclick="openContactPanel(${c.id})">
+            <div class="contact-avatar">${getInitials(c.firstName, c.lastName)}</div>
+            <div class="contact-name">${c.firstName} ${c.lastName}</div>
+            <div class="contact-meta">${c.type} · ${c.location}</div>
+            <div class="contact-details"><div><i class="fas fa-phone"></i> ${c.phone}</div><div><i class="fas fa-euro-sign"></i> ${c.budget}</div></div>
+            ${c.leadScore >= 80 ? '<div class="hot-badge">HOT</div>' : ''}
+        </div>
+    `).join('');
+}
+
+function openContactPanel(id) {
+    const contact = appState.contacts.find(c => c.id === id);
+    if (!contact) return;
+    appState.currentContactId = id;
+    document.getElementById('panelContactName').textContent = `${contact.firstName} ${contact.lastName}`;
+    document.getElementById('panelTabs').innerHTML = ['Overview', 'Logs', 'Notes', 'Files'].map(tab => 
+        `<div class="panel-tab ${tab === 'Overview' ? 'active' : ''}" onclick="switchPanelTab('${tab.toLowerCase()}')">${tab}</div>`
+    ).join('');
+    renderPanelTab('overview');
+    document.getElementById('contactPanel').classList.add('active');
+}
+
+function closeContactPanel() {
+    document.getElementById('contactPanel').classList.remove('active');
+    appState.currentContactId = null;
+}
+
+function getCurrentContact() {
+    return appState.contacts.find(c => c.id === appState.currentContactId);
+}
+
+function renderPanelTab(tab) {
+    const contact = getCurrentContact();
+    if (!contact) return;
+    if (tab === 'overview') {
+        document.getElementById('panelBody').innerHTML = `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                <div><strong>📧 Email</strong><br>${contact.email || '—'}</div>
+                <div><strong>📞 Phone</strong><br>${contact.phone || '—'}</div>
+                <div><strong>💰 Budget</strong><br>${contact.budget || '—'}</div>
+                <div><strong>📍 Location</strong><br>${contact.location || '—'}</div>
+            </div>
+            <div class="card"><div class="card-header"><div class="card-title">📝 Notes</div></div><div class="card-body">${contact.notes || 'No notes'}</div></div>
+            <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+                <button class="btn-primary" onclick="openAddLogModal()"><i class="fas fa-phone"></i> Add Log</button>
+                <button class="btn-primary" onclick="openAddNoteModal()"><i class="fas fa-sticky-note"></i> Add Note</button>
+                <button class="btn-primary" onclick="openAddFileModal()"><i class="fas fa-upload"></i> Add File</button>
+                <button class="btn-secondary" onclick="openAddDealModal(${contact.id})"><i class="fas fa-chart-line"></i> Add Deal</button>
+            </div>
+        `;
+    } else if (tab === 'logs') {
+        const logs = contact.logs || [];
+        document.getElementById('panelBody').innerHTML = `<button class="btn-primary" style="width:100%;margin-bottom:16px;" onclick="openAddLogModal()">+ Add Log</button>${logs.length ? logs.map((l,i)=>`<div class="list-item"><div><strong>${l.type}</strong> · ${l.date}</div><div>${l.summary}</div><button class="btn-secondary btn-sm" onclick="deleteLog(${i})">Delete</button></div>`).join('') : '<div class="empty-state">No logs</div>'}`;
+    } else if (tab === 'notes') {
+        const notes = contact.notesList || [];
+        document.getElementById('panelBody').innerHTML = `<button class="btn-primary" style="width:100%;margin-bottom:16px;" onclick="openAddNoteModal()">+ Add Note</button>${notes.length ? notes.map((n,i)=>`<div class="list-item"><div><strong>${n.title||'Note'}</strong><div>${n.content}</div><div>${n.date}</div><button class="btn-secondary btn-sm" onclick="deleteNote(${i})">Delete</button></div>`).join('') : '<div class="empty-state">No notes</div>'}`;
+    } else if (tab === 'files') {
+        const files = contact.files || [];
+        document.getElementById('panelBody').innerHTML = `<div style="border:2px dashed var(--border);padding:24px;text-align:center;cursor:pointer;margin-bottom:20px;" onclick="openAddFileModal()"><i class="fas fa-cloud-upload-alt"></i><p>Click to upload</p></div>${files.length ? files.map((f,i)=>`<div class="list-item"><div><i class="fas fa-file"></i> ${f.name}<div>${f.size} · ${f.date}</div><button class="btn-secondary btn-sm" onclick="deleteFile(${i})">Delete</button></div>`).join('') : '<div class="empty-state">No files</div>'}`;
+    }
+}
+
+// CRUD Operations
+function openGenericModal(title, bodyHtml, onSave) {
+    const modal = document.getElementById('genericModal');
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    const btn = document.getElementById('modalSaveBtn');
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.onclick = () => { onSave(); closeModal('genericModal'); };
+    modal.classList.add('active');
+}
+
+function openAddContactModal() {
+    openGenericModal('Add Contact', `
+        <div class="form-row"><input class="form-input" id="newFn" placeholder="First Name *"><input class="form-input" id="newLn" placeholder="Last Name *"></div>
+        <input class="form-input mt-2" id="newEmail" placeholder="Email"><input class="form-input mt-2" id="newPhone" placeholder="Phone">
+        <select class="form-select mt-2" id="newType"><option>Buyer</option><option>Seller</option><option>Investor</option></select>
+        <input class="form-input mt-2" id="newBudget" placeholder="Budget"><input class="form-input mt-2" id="newLocation" placeholder="Location">
+    `, () => {
+        const fn = document.getElementById('newFn').value.trim();
+        const ln = document.getElementById('newLn').value.trim();
+        if (!fn || !ln) { showToast('Name required'); return; }
+        appState.contacts.push({ id: appState.nextId.contact++, firstName: fn, lastName: ln, email: document.getElementById('newEmail').value, phone: document.getElementById('newPhone').value, type: document.getElementById('newType').value, budget: document.getElementById('newBudget').value, location: document.getElementById('newLocation').value || 'Cyprus', notes: '', leadScore: 50, logs: [], notesList: [], files: [], activities: [] });
+        updateCounters();
+        renderContacts();
+        showToast('Contact added');
+    });
+}
+
+function openAddLogModal() {
+    openGenericModal('Add Log', `<select class="form-select" id="logType"><option>call</option><option>email</option><option>meeting</option></select><input class="form-input mt-2" id="logSummary" placeholder="Summary"><textarea class="form-textarea mt-2" id="logDetails" placeholder="Details"></textarea>`, () => {
+        const c = getCurrentContact();
+        if (c) { c.logs = c.logs || []; c.logs.unshift({ type: document.getElementById('logType').value, summary: document.getElementById('logSummary').value, details: document.getElementById('logDetails').value, date: new Date().toLocaleDateString() }); showToast('Log added'); renderPanelTab('logs'); }
+    });
+}
+
+function openAddNoteModal() {
+    openGenericModal('Add Note', `<input class="form-input" id="noteTitle" placeholder="Title"><textarea class="form-textarea mt-2" id="noteContent" placeholder="Note content" rows="4"></textarea>`, () => {
+        const c = getCurrentContact();
+        if (c) { c.notesList = c.notesList || []; c.notesList.unshift({ title: document.getElementById('noteTitle').value, content: document.getElementById('noteContent').value, date: new Date().toLocaleDateString() }); showToast('Note added'); renderPanelTab('notes'); }
+    });
+}
+
+function openAddFileModal() {
+    openGenericModal('Add File', `<input class="form-input" id="fileName" placeholder="File name">`, () => {
+        const c = getCurrentContact();
+        if (c) { c.files = c.files || []; c.files.unshift({ name: document.getElementById('fileName').value || 'document.pdf', size: '1.2 MB', date: new Date().toLocaleDateString() }); showToast('File added'); renderPanelTab('files'); }
+    });
+}
+
+function openAddDealModal(contactId) {
+    openGenericModal('Add Deal', `<input class="form-input" id="dealAddress" placeholder="Property Address"><input class="form-input mt-2" id="dealPrice" placeholder="Price (€)" type="number"><select class="form-select mt-2" id="dealStage"><option>lead</option><option>qualified</option><option>viewing</option><option>offer</option></select>`, () => {
+        appState.deals.push({ id: appState.nextId.deal++, contactId, propertyAddress: document.getElementById('dealAddress').value, price: parseFloat(document.getElementById('dealPrice').value), stage: document.getElementById('dealStage').value, notes: '' });
+        showToast('Deal added');
+        if (appState.currentView === 'dashboard') renderDashboard();
+    });
+}
+
+function openAddTaskModal(contactId = null) {
+    openGenericModal('Add Task', `<input class="form-input" id="taskTitle" placeholder="Task title"><input class="form-input mt-2" type="date" id="taskDue"><select class="form-select mt-2" id="taskPrio"><option>high</option><option>medium</option><option>low</option></select>`, () => {
+        appState.tasks.push({ id: appState.nextId.task++, title: document.getElementById('taskTitle').value, dueDate: document.getElementById('taskDue').value, priority: document.getElementById('taskPrio').value, completed: false, contactId: contactId });
+        showToast('Task added');
+        if (appState.currentView === 'dashboard') renderDashboard();
+    });
+}
+
+function openAddEventModal(contactId = null) {
+    openGenericModal('Add Event', `<input class="form-input" id="eventTitle" placeholder="Event title"><input class="form-input mt-2" type="date" id="eventDate"><input class="form-input mt-2" type="time" id="eventTime"><select class="form-select mt-2" id="eventType"><option>Viewing</option><option>Meeting</option><option>Call</option></select>`, () => {
+        appState.events.push({ id: appState.nextId.event++, title: document.getElementById('eventTitle').value, date: document.getElementById('eventDate').value, time: document.getElementById('eventTime').value, type: document.getElementById('eventType').value, contactId: contactId });
+        showToast('Event added');
+        if (appState.currentView === 'dashboard') renderDashboard();
+    });
+}
+
+function deleteLog(i) { getCurrentContact().logs.splice(i, 1); renderPanelTab('logs'); showToast('Deleted'); }
+function deleteNote(i) { getCurrentContact().notesList.splice(i, 1); renderPanelTab('notes'); showToast('Deleted'); }
+function deleteFile(i) { getCurrentContact().files.splice(i, 1); renderPanelTab('files'); showToast('Deleted'); }
+
+// Inbox
+function renderInbox() {
+    const channels = ['all', 'email', 'whatsapp', 'unread'];
+    let filtered = appState.messages;
+    if (appState.currentChannel === 'email') filtered = filtered.filter(m => m.channel === 'email');
+    else if (appState.currentChannel === 'whatsapp') filtered = filtered.filter(m => m.channel === 'whatsapp');
+    else if (appState.currentChannel === 'unread') filtered = filtered.filter(m => !m.read);
+    filtered.sort((a,b) => new Date(b.time) - new Date(a.time));
+    
+    document.getElementById('content').innerHTML = `
+        <div class="inbox-layout">
+            <div class="inbox-sidebar">${channels.map(ch => `<div class="inbox-channel ${appState.currentChannel === ch ? 'active' : ''}" onclick="setChannel('${ch}')"><i class="fas ${ch==='email'?'fa-envelope':ch==='whatsapp'?'fa-whatsapp':'fa-inbox'}"></i><span>${ch.toUpperCase()}</span><span style="margin-left:auto">${ch==='unread'?appState.messages.filter(m=>!m.read).length:appState.messages.filter(m=>m.channel===ch||ch==='all').length}</span></div>`).join('')}<div style="padding:16px;"><button class="btn-primary" style="width:100%" onclick="openComposeModal()">+ Compose</button></div></div>
+            <div class="inbox-list">${filtered.map(m => `<div class="message-item ${!m.read ? 'unread' : ''}" onclick="selectMessage(${m.id})"><div><i class="fas ${m.channel==='email'?'fa-envelope':'fa-whatsapp'}"></i></div><div><div><strong>${m.fromName}</strong> · ${formatDate(m.time)}</div><div>${m.body.substring(0,80)}${m.body.length>80?'...':''}</div><div style="font-size:11px;color:var(--text-muted)">${m.integration}</div></div></div>`).join('') || '<div class="empty-state">No messages</div>'}</div>
+            <div class="message-detail" id="messageDetail"><div class="empty-state">Select a message</div></div>
+        </div>
+    `;
+}
+
+function setChannel(ch) { appState.currentChannel = ch; renderInbox(); }
+
+function selectMessage(id) {
+    const msg = appState.messages.find(m => m.id === id);
+    if (!msg) return;
+    if (!msg.read) { msg.read = true; updateCounters(); renderInbox(); }
+    document.getElementById('messageDetail').innerHTML = `<div style="padding:20px"><h3>${msg.subject || 'Message'}</h3><div><strong>${msg.fromName}</strong> · ${new Date(msg.time).toLocaleString()} · ${msg.integration}</div><div style="background:var(--bg-tertiary);padding:16px;margin:16px 0;border-radius:12px">${msg.body}</div><textarea id="replyMsg" class="form-textarea" rows="3" placeholder="Reply..."></textarea><button class="btn-primary mt-2" onclick="sendReply(${msg.id})">Send via ${msg.integration}</button></div>`;
+}
+
+function sendReply(id) { const reply = document.getElementById('replyMsg')?.value; if (reply) { showToast('Reply sent'); document.getElementById('replyMsg').value = ''; } }
+
+function openComposeModal() {
+    openGenericModal('Compose', `<select class="form-select" id="compChannel"><option>email</option><option>whatsapp</option></select><input class="form-input mt-2" id="compTo" placeholder="To"><textarea class="form-textarea mt-2" id="compBody" rows="4" placeholder="Message"></textarea>`, () => {
+        appState.messages.unshift({ id: appState.nextId.message++, channel: document.getElementById('compChannel').value, from: 'haris@propel.com', fromName: 'Haris Memic', to: document.getElementById('compTo').value, body: document.getElementById('compBody').value, time: new Date().toISOString(), read: true, contactId: null, integration: document.getElementById('compChannel').value === 'email' ? 'Gmail' : 'WhatsApp' });
+        updateCounters();
+        showToast('Message sent');
+        if (appState.currentView === 'inbox') renderInbox();
+    });
+}
+
+function renderPipeline() {
+    const stages = ['lead', 'qualified', 'viewing', 'offer', 'closed'];
+    document.getElementById('content').innerHTML = `<div class="pipeline-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;">${stages.map(s => `<div class="card"><div class="card-header"><strong>${s}</strong><span>${appState.deals.filter(d=>d.stage===s).length}</span></div><div class="card-body">${appState.deals.filter(d=>d.stage===s).map(d=>{const c=appState.contacts.find(c=>c.id===d.contactId);return `<div style="padding:12px;border-bottom:1px solid var(--border);cursor:pointer" onclick="openContactPanel(${d.contactId})"><strong>${d.propertyAddress}</strong><div>${formatCurrency(d.price)}</div><div>${c?.firstName} ${c?.lastName}</div></div>`;}).join('')||'<div class="empty-state">No deals</div>'}</div></div>`).join('')}</div>`;
+}
+
+function navigateTo(view) {
+    appState.currentView = view;
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+    if (view === 'dashboard') renderDashboard();
+    else if (view === 'contacts') renderContacts();
+    else if (view === 'inbox') renderInbox();
+    else if (view === 'pipeline') renderPipeline();
+}
+
+// Initialize
+function init() {
+    initData();
+    renderDashboard();
+    document.getElementById('menuToggleBtn').onclick = () => document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarCloseBtn').onclick = () => { document.getElementById('sidebar').classList.add('hidden'); document.getElementById('main').classList.add('sidebar-hidden'); };
+    document.getElementById('themeToggleBtn').onclick = () => { const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); };
+    document.getElementById('addContactBtn').onclick = openAddContactModal;
+    document.getElementById('globalSearch').oninput = (e) => { if (appState.currentView === 'contacts') renderContactsGrid(e.target.value); };
+    document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => navigateTo(i.dataset.view)));
+}
+
+// Global exports
+window.openContactPanel = openContactPanel;
+window.closeContactPanel = closeContactPanel;
+window.switchPanelTab = renderPanelTab;
+window.openAddLogModal = openAddLogModal;
+window.openAddNoteModal = openAddNoteModal;
+window.openAddFileModal = openAddFileModal;
+window.openAddDealModal = openAddDealModal;
+window.openAddTaskModal = openAddTaskModal;
+window.openAddEventModal = openAddEventModal;
+window.deleteLog = deleteLog;
+window.deleteNote = deleteNote;
+window.deleteFile = deleteFile;
+window.setChannel = setChannel;
+window.selectMessage = selectMessage;
+window.sendReply = sendReply;
+window.openComposeModal = openComposeModal;
+window.navigateTo = navigateTo;
+window.closeModal = closeModal;
+
+init();
+</script>
+</body>
+</html>
